@@ -17,9 +17,13 @@
 
 #include <ed25519.h>
 #include <gflags/gflags.h>
+#include <ametsuchi/block_serializer.hpp>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <model/converters/pb_transaction_factory.hpp>
+#include <nonstd/optional.hpp>
+#include <torii/command_client.hpp>
 
 DEFINE_bool(new_account, false, "Choose if account does not exist");
 DEFINE_string(name, "", "Name of the account");
@@ -32,6 +36,23 @@ DEFINE_validator(name, &not_empty_name);
 void create_account(std::string name);
 
 int main(int argc, char* argv[]) {
+  auto Ip = "0.0.0.0";
+  auto port = 5501;
+  if (argc > 2) {
+    if (argv[2] == "send") {
+      std::string tx = argv[3];
+      iroha::ametsuchi::BlockSerializer serializer;
+      auto irohatx = serializer.deserialize(tx);
+      if (irohatx.has_value()) {
+        iroha::model::converters::PbTransactionFactory factory;
+        auto pb_tx = factory.serialize(irohatx.value());
+        iroha::protocol::ToriiResponse response;
+        torii::CommandSyncClient(Ip, port).Torii(pb_tx, response);
+        // Print response
+      }
+    }
+  }
+  /*
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   gflags::ShutDownCommandLineFlags();
@@ -43,6 +64,7 @@ int main(int argc, char* argv[]) {
     }
     create_account(FLAGS_name);
   }
+   */
 }
 
 std::string hex_str(unsigned char* data, int len) {

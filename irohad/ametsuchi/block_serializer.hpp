@@ -45,6 +45,7 @@ class BlockSerializer{
  public:
   std::vector<uint8_t > serialize(model::Block block);
   nonstd::optional<model::Block> deserialize(const std::vector<uint8_t >& bytes);
+  nonstd::optional<model::Transaction> deserialize(const std::string json_tx);
  private:
   void serialize(PrettyWriter<StringBuffer>& writer, const model::Block& block);
   void serialize(PrettyWriter<StringBuffer>& writer, const model::Signature& signature);
@@ -64,6 +65,7 @@ class BlockSerializer{
   void serialize(PrettyWriter<StringBuffer>& writer, const model::TransferAsset& transfer_asset);
 
   void deserialize(Document& doc, std::vector<model::Transaction>& transactions);
+  nonstd::optional<model::Transaction> deserialize(GenericValue<rapidjson::UTF8<char>>::Object& json_tx);
   void deserialize(GenericValue<rapidjson::UTF8<char>>::Object& json_tx,
                    std::vector<std::shared_ptr<model::Command>>& commands);
   nonstd::optional<model::AddPeer> deserialize_add_peer(GenericValue<UTF8<char>>::Object& json_command);
